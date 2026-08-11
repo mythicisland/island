@@ -7,8 +7,8 @@ plugins {
 }
 
 allprojects {
-    group = "net.mythicisland.template"
-    version = "1.0.0"
+    group = "net.mythicisland"
+    version = "0.0.1"
 
     repositories {
         mavenCentral()
@@ -50,14 +50,6 @@ subprojects {
     tasks.shadowJar {
         mergeServiceFiles()
         archiveFileName.set("${project.name}.jar")
-    }
-
-    tasks.processResources {
-        filesMatching("plugin.yml") {
-            expand(
-                "version" to project.version
-            )
-        }
     }
 
 }

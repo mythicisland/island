@@ -1,1 +1,1 @@
-# `template-gradle`
+# Mythic Island
