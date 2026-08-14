@@ -29,6 +29,7 @@ subprojects {
         testImplementation(rootProject.libs.kotlin.test)
         implementation(rootProject.libs.kotlinx.coroutines.core)
 
+        implementation(rootProject.libs.jnats)
         implementation(rootProject.libs.fastutil)
         implementation(rootProject.libs.caffeine)
         implementation(rootProject.libs.cloud.api)
