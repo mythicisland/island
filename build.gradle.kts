@@ -32,8 +32,8 @@ subprojects {
         implementation(rootProject.libs.jnats)
         implementation(rootProject.libs.fastutil)
         implementation(rootProject.libs.caffeine)
-        implementation(rootProject.libs.cloud.api)
         implementation(rootProject.libs.bundles.adventure)
+        implementation(rootProject.libs.cloud.api)
         implementation(rootProject.libs.bundles.configurate)
         implementation(rootProject.libs.bundles.logging)
     }
@@ -51,6 +51,10 @@ subprojects {
         toolchain.languageVersion.set(JavaLanguageVersion.of(25))
     }
 
+    tasks.withType<JavaExec> {
+        jvmArgs("--enable-native-access=ALL-UNNAMED")
+    }
+
     tasks.test {
         useJUnitPlatform()
     }
@@ -58,6 +62,9 @@ subprojects {
     tasks.shadowJar {
         mergeServiceFiles()
         archiveFileName.set("${project.name}.jar")
+        manifest {
+            attributes["Enable-Native-Access"] = "ALL-UNNAMED"
+        }
     }
 
 }

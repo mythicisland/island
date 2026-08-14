@@ -1,6 +1,6 @@
 package net.mythicisland.core.island
 
-import app.simplecloud.api.CloudApi
+//import app.simplecloud.api.CloudApi
 import app.simplecloud.api.runtime.SimpleCloudRuntime
 import net.minestom.server.Auth
 import net.minestom.server.MinecraftServer
@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger
 abstract class Island : IslandServer {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
-    private val api: CloudApi = CloudApi.create()
+    //private val api: CloudApi = CloudApi.create()
     private val minecraftServer: MinecraftServer = createMinecraftServer()
 
     override fun start() {
@@ -41,12 +41,12 @@ abstract class Island : IslandServer {
     }
 
     override fun getServerPort(): Int {
-        return System.getenv("SERVER_PORT").toIntOrNull() ?: 25565
+        return System.getenv("SERVER_PORT")?.toIntOrNull() ?: 25565
     }
 
-    override fun getCloudApi(): CloudApi {
+    /*override fun getCloudApi(): CloudApi {
         return this.api
-    }
+    }*/
 
     override fun getInstanceManager(): InstanceManager {
         return MinecraftServer.getInstanceManager()

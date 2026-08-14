@@ -29,7 +29,7 @@ interface IslandServer {
     /**
      * Gets the [CloudApi] instance from this server.
      */
-    fun getCloudApi(): CloudApi
+    //fun getCloudApi(): CloudApi
 
     /**
      * Gets the Global [Scheduler] from this server.

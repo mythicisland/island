@@ -1,6 +1,7 @@
 package net.mythicisland.common.repository
 
 import kotlinx.coroutines.*
+import net.mythicisland.common.configurate.GenericEnumSerializer
 import org.apache.logging.log4j.LogManager
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.objectMapperFactory
