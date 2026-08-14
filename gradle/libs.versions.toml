@@ -9,14 +9,25 @@ slf4j = "2.0.18"
 
 # Plugins
 shadow = "9.6.1"
+kraken = "1.1.1"
 
 # Other dependencies
 cloud-api = "0.1.0-platform.52-dev.1.1-7a06605"
 caffeine = "3.2.4"
 configurate = "4.2.0"
+jnats = "2.26.1"
+fastutil = "8.5.19"
 
 # Minestom
 minestom = "2026.08.07-26.2"
+
+# gRPC
+protobuf = "4.35.1"
+grpc = "1.83.1"
+grpc-kotlin = "1.5.0"
+
+# Adventure
+adventure = "5.2.0"
 
 [libraries]
 # Kotlin
@@ -36,15 +47,31 @@ configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotli
 # Other dependencies
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 cloud-api = { module = "app.simplecloud.api:api", version.ref = "cloud-api" }
+jnats = { module = "io.nats:jnats", version.ref = "jnats" }
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 # Minestom
 minestom = { module = "net.minestom:minestom", version.ref = "minestom" }
 minestom-testing = { module = "net.minestom:testing", version.ref = "minestom" }
 
+# Adventure
+adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
+
+# gRPC
+protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
+grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
+grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
+grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+grpc-netty-shaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
+
 [bundles]
 logging = ["log4j-core", "log4j-api", "log4j-slf4j-impl", "slf4j-api"]
 configurate = ["configurate-yaml", "configurate-extra-kotlin"]
+adventure = ["adventure-api", "adventure-text-minimessage"]
+grpc = ["grpc-stub", "grpc-netty-shaded", "grpc-kotlin-stub", "grpc-protobuf", "protobuf-kotlin"]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+kraken = { id = "dev.xxjanisxx.kraken", version.ref = "kraken" }

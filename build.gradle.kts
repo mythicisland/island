@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.shadow)
 }
 
@@ -28,6 +28,13 @@ subprojects {
     dependencies {
         testImplementation(rootProject.libs.kotlin.test)
         implementation(rootProject.libs.kotlinx.coroutines.core)
+
+        implementation(rootProject.libs.fastutil)
+        implementation(rootProject.libs.caffeine)
+        implementation(rootProject.libs.cloud.api)
+        implementation(rootProject.libs.bundles.adventure)
+        implementation(rootProject.libs.bundles.configurate)
+        implementation(rootProject.libs.bundles.logging)
     }
 
     kotlin {
