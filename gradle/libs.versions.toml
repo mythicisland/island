@@ -17,6 +17,7 @@ caffeine = "3.2.4"
 configurate = "4.2.0"
 jnats = "2.26.1"
 fastutil = "8.5.19"
+jline = "4.3.1"
 
 # Minestom
 minestom = "2026.08.07-26.2"
@@ -49,6 +50,7 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "c
 cloud-api = { module = "app.simplecloud.api:api", version.ref = "cloud-api" }
 jnats = { module = "io.nats:jnats", version.ref = "jnats" }
 fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
+jline = { module = "org.jline:jline", version.ref = "jline" }
 
 # Minestom
 minestom = { module = "net.minestom:minestom", version.ref = "minestom" }
