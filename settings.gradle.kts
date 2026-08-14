@@ -3,8 +3,10 @@ plugins {
 }
 
 include(
-    "games:battle",
-    "games:lobby"
+    "modules:common",
+    "modules:core",
+    "modules:lobby",
+    "modules:ui"
 )
 
 rootProject.name = "island"

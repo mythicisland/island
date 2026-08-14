@@ -15,7 +15,7 @@ cloud-api = "0.1.0-platform.52-dev.1.1-7a06605"
 caffeine = "3.2.4"
 configurate = "4.2.0"
 
-# Minecraft
+# Minestom
 minestom = "2026.08.07-26.2"
 
 [libraries]
@@ -37,7 +37,7 @@ configurate-extra-kotlin = { module = "org.spongepowered:configurate-extra-kotli
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 cloud-api = { module = "app.simplecloud.api:api", version.ref = "cloud-api" }
 
-# Minecraft
+# Minestom
 minestom = { module = "net.minestom:minestom", version.ref = "minestom" }
 minestom-testing = { module = "net.minestom:testing", version.ref = "minestom" }
 
