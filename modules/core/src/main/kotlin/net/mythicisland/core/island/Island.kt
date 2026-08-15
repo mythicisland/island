@@ -18,6 +18,7 @@ abstract class Island : IslandServer {
 
     override fun start() {
         logger.info("Starting server ${getServerName()} at ${getServerHost()}:${getServerPort()}")
+        MinecraftServer.setBrandName("Island")
         MinecraftServer.setCompressionThreshold(-1)
 
         MinestomTerminal.start()
