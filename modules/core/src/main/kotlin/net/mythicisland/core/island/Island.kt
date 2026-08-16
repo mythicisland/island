@@ -11,6 +11,8 @@ import net.minestom.server.MinecraftServer
 import net.minestom.server.instance.InstanceManager
 import net.minestom.server.timer.Scheduler
 import net.mythicisland.core.IslandServer
+import net.mythicisland.core.command.CommandManager
+import net.mythicisland.core.command.impl.CommandManagerImpl
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import kotlin.io.path.Path
@@ -21,6 +23,7 @@ abstract class Island : IslandServer {
     private val api: CloudApi = CloudApi.create()
     private val minecraftServer: MinecraftServer = createMinecraftServer()
     private var luckPerms: LuckPerms? = null
+    private var commandManager: CommandManager? = null
 
     override fun start() {
         logger.info("Starting server instance ${getServerName()} at ${getServerHost()}:${getServerPort()}")
@@ -31,6 +34,10 @@ abstract class Island : IslandServer {
         luckPerms = LuckPermsMinestom.builder(directory)
             .commandRegistry(CommandRegistry.minestom())
             .enable()
+
+        // Needs LuckPerms, it answers the permission checks of the commands.
+        commandManager = CommandManagerImpl(MinecraftServer.getCommandManager(), getLuckPerms())
+
         MinestomTerminal.start()
     }
 
@@ -62,6 +69,10 @@ abstract class Island : IslandServer {
 
     override fun getLuckPerms(): LuckPerms {
         return luckPerms ?: LuckPermsProvider.get()
+    }
+
+    override fun getCommandManager(): CommandManager {
+        return checkNotNull(commandManager) { "The command manager is only available after start()." }
     }
 
     override fun getInstanceManager(): InstanceManager {
