@@ -15,6 +15,7 @@ allprojects {
         maven("https://repo.simplecloud.app/snapshots")
         maven("https://repo.mythicisland.net/public")
         maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://repo.hypera.dev/snapshots")
         maven("https://buf.build/gen/maven")
     }
 }
@@ -34,6 +35,7 @@ subprojects {
         implementation(rootProject.libs.caffeine)
         implementation(rootProject.libs.bundles.adventure)
         implementation(rootProject.libs.cloud.api)
+        implementation(rootProject.libs.luckperms.minestom)
         implementation(rootProject.libs.bundles.configurate)
         implementation(rootProject.libs.bundles.logging)
     }

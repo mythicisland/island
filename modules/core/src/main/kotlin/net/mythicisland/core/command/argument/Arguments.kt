@@ -7,17 +7,16 @@ import net.minestom.server.entity.Player
 import java.util.UUID
 
 /**
- * Creates the built in argument declarations.
+ * The argument types the commands can use.
  *
- * Every argument keeps the Minestom argument type underneath, so the client
- * still gets the correct syntax highlighting and completions. Types that are
- * missing here can be added by wrapping a Minestom argument with
- * [CommandArgument].
+ * Underneath every one of them is a Minestom argument type, so the client
+ * still colours the command correctly and offers completions. What is missing
+ * here can be built by wrapping a Minestom argument with [CommandArgument].
  */
 object Arguments {
 
     /**
-     * Error code reported when a player argument matched no online player.
+     * Reported when a player argument found nobody online.
      */
     const val PLAYER_NOT_FOUND_ERROR: Int = 100
 
@@ -25,8 +24,8 @@ object Arguments {
      * A single word without spaces.
      *
      * @param name the argument name.
-     * @param allowed the accepted words, all words are accepted when empty.
-     * @return the argument declaration.
+     * @param allowed the accepted words, every word is fine when empty.
+     * @return the argument.
      */
     fun word(name: String, vararg allowed: String): CommandArgument<String> {
         val argument = ArgumentType.Word(name)
@@ -37,20 +36,20 @@ object Arguments {
     }
 
     /**
-     * A word, or multiple words when quoted.
+     * A word, or several words in quotes.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     fun string(name: String): CommandArgument<String> =
         CommandArgument(ArgumentType.String(name))
 
     /**
-     * All the remaining input of the command, spaces included. Has to be the
-     * last argument of a syntax.
+     * The whole rest of the input, spaces included. Has to be the last
+     * argument of the syntax.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     fun greedyString(name: String): CommandArgument<String> =
         CommandArgument(ArgumentType.StringArray(name).map { words -> words.joinToString(" ") })
@@ -59,9 +58,9 @@ object Arguments {
      * A whole number.
      *
      * @param name the argument name.
-     * @param min the smallest accepted value, unbounded when null.
-     * @param max the biggest accepted value, unbounded when null.
-     * @return the argument declaration.
+     * @param min the smallest accepted value, no limit when null.
+     * @param max the biggest accepted value, no limit when null.
+     * @return the argument.
      */
     fun integer(name: String, min: Int? = null, max: Int? = null): CommandArgument<Int> {
         val argument = ArgumentType.Integer(name)
@@ -78,9 +77,9 @@ object Arguments {
      * A decimal number.
      *
      * @param name the argument name.
-     * @param min the smallest accepted value, unbounded when null.
-     * @param max the biggest accepted value, unbounded when null.
-     * @return the argument declaration.
+     * @param min the smallest accepted value, no limit when null.
+     * @param max the biggest accepted value, no limit when null.
+     * @return the argument.
      */
     fun double(name: String, min: Double? = null, max: Double? = null): CommandArgument<Double> {
         val argument = ArgumentType.Double(name)
@@ -94,29 +93,29 @@ object Arguments {
     }
 
     /**
-     * A boolean, written as `true` or `false`.
+     * `true` or `false`.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     fun boolean(name: String): CommandArgument<Boolean> =
         CommandArgument(ArgumentType.Boolean(name))
 
     /**
-     * A uuid in its dashed representation.
+     * A uuid, written with dashes.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     fun uuid(name: String): CommandArgument<UUID> =
         CommandArgument(ArgumentType.UUID(name))
 
     /**
-     * An enum constant, written in lower case. The client offers every
-     * constant as a completion.
+     * An enum value, written in lower case. The client offers all of them as
+     * completions.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     inline fun <reified E : Enum<E>> enum(name: String): CommandArgument<E> {
         val argument = ArgumentEnum(name, E::class.java)
@@ -125,12 +124,12 @@ object Arguments {
     }
 
     /**
-     * A single online player, addressed by name or by a target selector.
+     * One online player, written as a name or as a target selector.
      *
-     * Parsing fails when the selector matches no player.
+     * Parsing fails when nobody matches.
      *
      * @param name the argument name.
-     * @return the argument declaration.
+     * @return the argument.
      */
     fun player(name: String): CommandArgument<Player> {
         val argument = ArgumentType.Entity(name)

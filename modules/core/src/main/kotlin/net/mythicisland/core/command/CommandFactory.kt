@@ -5,29 +5,26 @@ import net.minestom.server.command.CommandSender
 import net.minestom.server.command.builder.CommandExecutor
 import net.minestom.server.command.builder.condition.CommandCondition
 import net.minestom.server.entity.Player
+import net.mythicisland.core.command.argument.CommandArgument
 import net.mythicisland.core.command.impl.CommandBuilderImpl
 import net.mythicisland.core.command.impl.CommandContextImpl
 import net.minestom.server.command.builder.Command as MinestomCommand
 
 /**
  * Turns a [Command] into the Minestom command it is registered as.
- *
- * Branches with optional arguments are expanded into one Minestom syntax per
- * accepted argument count, the default values are applied by the
- * [net.mythicisland.core.command.impl.CommandContextImpl] afterwards.
  */
-internal class CommandFactory(
-    private val permissionHandler: CommandPermissionHandler,
+class CommandFactory(
+    private val permissions: (CommandSender, String) -> Boolean,
     private val noPermissionMessage: Component,
     private val playerOnlyMessage: Component,
 ) {
 
     /**
-     * Builds the given command.
+     * Builds a command.
      *
      * @param command the command to build.
      * @return the Minestom command to register.
-     * @throws IllegalArgumentException if the command declares an invalid syntax.
+     * @throws IllegalArgumentException if one of the syntaxes is invalid.
      */
     fun create(command: Command): MinestomCommand {
         val nodes = mutableListOf<CommandNode>()
@@ -54,12 +51,12 @@ internal class CommandFactory(
                 }
 
                 require(!defaultAssigned) {
-                    "Command '${command.name}' declares more than one executor without arguments."
+                    "Command '${command.name}' has more than one executor without arguments."
                 }
                 defaultAssigned = true
 
-                // The default executor is not covered by a condition, so the
-                // branch is guarded here instead.
+                // Minestom runs the default executor without checking a
+                // condition, so the check happens here.
                 result.defaultExecutor = CommandExecutor { sender, context ->
                     if (condition.canUse(sender, context.input)) {
                         executor.apply(sender, context)
@@ -72,7 +69,7 @@ internal class CommandFactory(
 
     private fun executorOf(node: CommandNode): CommandExecutor =
         CommandExecutor { sender, context ->
-            node.executor(CommandContextImpl(sender, context, node.parameters))
+            node.executor(CommandContextImpl(sender, context, node.elements))
         }
 
     private fun conditionOf(node: CommandNode): CommandCondition =
@@ -81,13 +78,11 @@ internal class CommandFactory(
         }
 
     /**
-     * Expands a branch into the argument lists Minestom has to know about, one
-     * per accepted argument count.
+     * Splits a syntax into the argument lists Minestom needs, one per argument
+     * count the sender may type.
      */
-    private fun expand(elements: List<CommandElement>): List<List<CommandElement>> {
-        val optional = elements.indexOfFirst { element ->
-            element is CommandParameter && element.declaration.optional
-        }
+    private fun expand(elements: List<CommandArgument<*>>): List<List<CommandArgument<*>>> {
+        val optional = elements.indexOfFirst { element -> element.optional }
         if (optional < 0) {
             return listOf(elements)
         }
@@ -95,10 +90,10 @@ internal class CommandFactory(
     }
 
     /**
-     * Checks whether a sender may use a branch.
+     * Checks whether a sender may use a syntax.
      *
-     * @param input the executed command string, null while the command graph
-     * is built for a player. No feedback is sent in that case.
+     * @param input what the sender typed, null while the command list is built
+     * for a player. Nothing is sent back in that case.
      */
     private fun allows(
         sender: CommandSender,
@@ -113,7 +108,7 @@ internal class CommandFactory(
             return false
         }
 
-        if (permission == null || permissionHandler.hasPermission(sender, permission)) {
+        if (permission == null || permissions(sender, permission)) {
             return true
         }
 

@@ -14,7 +14,7 @@ import net.minestom.server.command.builder.Command as MinestomCommand
 class CommandFactoryTest {
 
     private val factory = CommandFactory(
-        permissionHandler = { _, _ -> true },
+        permissions = { _, _ -> true },
         noPermissionMessage = Component.empty(),
         playerOnlyMessage = Component.empty(),
     )

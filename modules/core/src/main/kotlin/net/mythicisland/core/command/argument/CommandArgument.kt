@@ -3,11 +3,10 @@ package net.mythicisland.core.command.argument
 import net.minestom.server.command.builder.arguments.Argument
 
 /**
- * A typed argument declaration.
+ * An argument together with the type it parses into.
  *
- * An argument is declared once, usually as a field of the command, and is used
- * as the key to read the parsed value back from the [net.mythicisland.core.command.CommandContext]. That
- * removes the string lookups of the plain Minestom api:
+ * Write it down once as a field of the command and use it to read the value
+ * back, instead of looking it up by name like the plain Minestom api does:
  *
  * ```
  * private val size = Arguments.integer("size", min = 1, max = 32)
@@ -16,19 +15,18 @@ import net.minestom.server.command.builder.arguments.Argument
  * val blocks: Int = context[size]
  * ```
  *
- * Instances are immutable, [optional] and [map] return new declarations.
+ * An argument never changes, [optional] and [map] return a new one.
  *
  * @param T the type this argument parses into.
  */
 class CommandArgument<T : Any> private constructor(
-    internal val argument: Argument<T>,
-    internal val optional: Boolean,
-    internal val defaultValue: (() -> T)?,
+    val argument: Argument<T>,
+    val optional: Boolean,
+    val defaultValue: (() -> T)?,
 ) {
 
     /**
-     * Wraps a Minestom argument. Used by [Arguments] and as the escape hatch
-     * for argument types this library does not provide out of the box.
+     * Wraps a Minestom argument, for types [Arguments] does not offer.
      *
      * @param argument the Minestom argument to wrap.
      */
@@ -41,40 +39,37 @@ class CommandArgument<T : Any> private constructor(
         get() = argument.id
 
     /**
-     * Marks the argument as optional without a default value.
+     * Lets the sender leave the argument out. It has to be the last one of the
+     * syntax.
      *
-     * Optional arguments have to be the last ones of a syntax. Reading them
-     * with [net.mythicisland.core.command.CommandContext.get] throws when the sender left them out, use
-     * [net.mythicisland.core.command.CommandContext.find] instead.
+     * Read it with `find`, `get` throws when the sender left it out.
      *
-     * @return a new optional declaration.
+     * @return a copy that may be left out.
      */
     fun optional(): CommandArgument<T> =
         CommandArgument(argument, optional = true, defaultValue = null)
 
     /**
-     * Marks the argument as optional with a default value.
+     * Lets the sender leave the argument out and uses [defaultValue] instead.
+     * It has to be the last one of the syntax.
      *
-     * The default is applied when the sender left the argument out, so
-     * [net.mythicisland.core.command.CommandContext.get] always returns a value.
-     *
-     * @param defaultValue the value used when the argument is missing.
-     * @return a new optional declaration.
+     * @param defaultValue the value to use when the argument is missing.
+     * @return a copy that may be left out.
      */
     fun optional(defaultValue: T): CommandArgument<T> =
         CommandArgument(argument, optional = true, defaultValue = { defaultValue })
 
     /**
-     * Converts the parsed value into another type, for example to resolve a
-     * player name into a domain object.
+     * Parses the argument, then converts the value, for example a player into
+     * their island.
      *
-     * The mapper runs during parsing and must not return null. Note that
-     * mapping an argument with a restricted set of values (see
-     * [Arguments.word] and [Arguments.enum]) makes the client render it as a
-     * free text argument instead of literals.
+     * The converter runs while parsing and must not return null.
+     *
+     * Do not use it on [Arguments.word] or [Arguments.enum], the client then
+     * shows a free text field instead of the words it accepts.
      *
      * @param mapper converts the parsed value.
-     * @return a new declaration producing the mapped type.
+     * @return a copy that gives back the converted type.
      */
     fun <R : Any> map(mapper: (T) -> R): CommandArgument<R> {
         val mapped = argument.map { value -> mapper(value) }

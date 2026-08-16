@@ -4,10 +4,10 @@ import net.minestom.server.command.CommandSender
 import net.mythicisland.core.command.argument.CommandArgument
 
 /**
- * Gives access to the parsed arguments of a single execution.
+ * The parsed arguments of a single run of a command.
  *
- * Arguments are read with the declaration itself instead of a string key, so
- * the returned value is already typed:
+ * An argument is read with the argument itself, not with its name, so the
+ * value comes back with the right type:
  *
  * ```
  * val target: Player = context[targetArgument]
@@ -16,36 +16,33 @@ import net.mythicisland.core.command.argument.CommandArgument
 interface CommandContext {
 
     /**
-     * The sender that executed the command.
+     * Who ran the command.
      */
     val sender: CommandSender
 
     /**
-     * The raw command string, without the leading slash.
+     * What the sender typed, without the leading slash.
      */
     val input: String
 
     /**
-     * Gets the value of an argument.
+     * Reads an argument. Optional arguments fall back to their default value.
      *
-     * Optional arguments fall back to their default value when the sender left
-     * them out.
-     *
-     * @param argument the argument declaration to read.
+     * @param argument the argument to read.
      * @return the parsed value.
-     * @throws IllegalArgumentException if the argument is not part of the
-     * executed syntax, or if it is optional, was left out and has no default.
+     * @throws IllegalArgumentException if the argument belongs to another
+     * syntax, or if the sender left it out, and it has no default value.
      */
     operator fun <T : Any> get(argument: CommandArgument<T>): T
 
     /**
-     * Gets the value of an argument, or null if it was left out and has no
-     * default value.
+     * Reads an argument the sender may have left out.
      *
-     * @param argument the argument declaration to read.
-     * @return the parsed value, null if the argument has no value.
-     * @throws IllegalArgumentException if the argument is not part of the
-     * executed syntax.
+     * @param argument the argument to read.
+     * @return the parsed value, or null if the sender left the argument out,
+     * and it has no default value.
+     * @throws IllegalArgumentException if the argument belongs to another
+     * syntax.
      */
     fun <T : Any> find(argument: CommandArgument<T>): T?
 

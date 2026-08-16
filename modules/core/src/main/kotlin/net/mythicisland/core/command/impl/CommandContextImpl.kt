@@ -5,15 +5,15 @@ import net.minestom.server.command.builder.CommandContext
 import net.mythicisland.core.command.argument.CommandArgument
 
 /**
- * Default [net.mythicisland.core.command.CommandContext], reading the values parsed by Minestom.
+ * Default [net.mythicisland.core.command.CommandContext], reading what Minestom parsed.
  *
- * @param parameters the arguments declared by the executed branch, used to
- * reject lookups with arguments of another branch.
+ * @param elements the arguments of the syntax that ran, used to catch reads
+ * with an argument of another syntax.
  */
-internal class CommandContextImpl(
+class CommandContextImpl(
     override val sender: CommandSender,
     private val context: CommandContext,
-    private val parameters: List<CommandArgument<*>>,
+    private val elements: List<CommandArgument<*>>,
 ) : net.mythicisland.core.command.CommandContext {
 
     override val input: String
@@ -22,14 +22,14 @@ internal class CommandContextImpl(
     override fun <T : Any> get(argument: CommandArgument<T>): T {
         val value = find(argument)
         requireNotNull(value) {
-            "Argument '${argument.name}' was not given and has no default value, use find() instead."
+            "Argument '${argument.name}' was left out and has no default value, use find() instead."
         }
         return value
     }
 
     override fun <T : Any> find(argument: CommandArgument<T>): T? {
-        require(parameters.contains(argument)) {
-            "Argument '${argument.name}' is not part of the executed syntax."
+        require(elements.contains(argument)) {
+            "Argument '${argument.name}' does not belong to the syntax that ran."
         }
 
         if (context.has(argument.argument)) {

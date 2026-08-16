@@ -2,24 +2,20 @@ package net.mythicisland.core.command.impl
 
 import net.minestom.server.command.builder.arguments.ArgumentType
 import net.minestom.server.entity.Player
-import net.mythicisland.core.command.argument.CommandArgument
 import net.mythicisland.core.command.CommandBuilder
 import net.mythicisland.core.command.CommandContext
-import net.mythicisland.core.command.CommandElement
-import net.mythicisland.core.command.CommandLiteral
 import net.mythicisland.core.command.CommandNode
-import net.mythicisland.core.command.CommandParameter
-import kotlin.collections.plus
+import net.mythicisland.core.command.argument.CommandArgument
 
 /**
- * Default [net.mythicisland.core.command.CommandBuilder], collecting the finished branches of one command.
+ * Default [CommandBuilder].
  *
- * Every builder method returns a new instance sharing the same [nodes] list,
- * which keeps the declared branches independent of each other.
+ * Every method returns a new builder that shares the same [nodes] list, which
+ * is why the syntaxes of a command cannot get in each other's way.
  */
-internal class CommandBuilderImpl private constructor(
+class CommandBuilderImpl private constructor(
     private val nodes: MutableList<CommandNode>,
-    private val elements: List<CommandElement>,
+    private val elements: List<CommandArgument<*>>,
     private val permission: String?,
 ) : CommandBuilder {
 
@@ -28,19 +24,19 @@ internal class CommandBuilderImpl private constructor(
     override fun literal(vararg names: String): CommandBuilder {
         require(names.isNotEmpty()) { "A literal needs at least one name." }
 
-        // A single name maps to a real literal, multiple names to a word
-        // restricted to them, which the client also renders as literals.
+        // One name becomes a real literal, several names become a word that
+        // only accepts them, which the client also draws as literals.
         val argument = if (names.size == 1) {
             ArgumentType.Literal(names[0])
         } else {
             ArgumentType.Word(names[0]).from(*names)
         }
 
-        return CommandBuilderImpl(nodes, elements + CommandLiteral(argument), permission)
+        return CommandBuilderImpl(nodes, elements + CommandArgument(argument), permission)
     }
 
     override fun argument(argument: CommandArgument<*>): CommandBuilder =
-        CommandBuilderImpl(nodes, elements + CommandParameter(argument), permission)
+        CommandBuilderImpl(nodes, elements + argument, permission)
 
     override fun permission(permission: String): CommandBuilder =
         CommandBuilderImpl(nodes, elements, permission)
@@ -50,7 +46,7 @@ internal class CommandBuilderImpl private constructor(
     }
 
     override fun executesPlayer(executor: (Player, CommandContext) -> Unit) {
-        // The sender type is guaranteed by the condition of the syntax.
+        // Only players get here, the condition of the syntax makes sure of it.
         add(playerOnly = true) { context -> executor(context.sender as Player, context) }
     }
 
@@ -60,24 +56,29 @@ internal class CommandBuilderImpl private constructor(
         nodes.add(node)
     }
 
+    /**
+     * Stops syntaxes that would not work the way they read.
+     *
+     * Names have to be unique because Minestom keeps the parsed values under
+     * them, literals included. Optional arguments have to come last because
+     * the syntax is split into one Minestom syntax per argument count.
+     */
     private fun validate(node: CommandNode) {
         val names = mutableSetOf<String>()
-        for (parameter in node.parameters) {
-            require(names.add(parameter.name)) {
-                "Argument '${parameter.name}' is used more than once in the same syntax."
-            }
-        }
-
         var optionalSeen = false
+
         for (element in node.elements) {
-            val optional = element is CommandParameter && element.declaration.optional
+            require(names.add(element.name)) {
+                "Argument '${element.name}' is used more than once in the same syntax."
+            }
+
             if (optionalSeen) {
-                require(optional) {
-                    "Optional arguments have to be the last ones of a syntax, " +
-                        "'${element.argument.id}' follows an optional argument."
+                require(element.optional) {
+                    "Optional arguments have to come last, " +
+                        "'${element.name}' stands behind an optional one."
                 }
             }
-            optionalSeen = optionalSeen || optional
+            optionalSeen = optionalSeen || element.optional
         }
     }
 }

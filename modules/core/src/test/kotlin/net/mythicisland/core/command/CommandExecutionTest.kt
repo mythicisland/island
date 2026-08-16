@@ -20,7 +20,9 @@ class CommandExecutionTest {
     private var permitted = true
     private val commands = CommandManagerImpl(
         minestom,
-        CommandPermissionHandler { _, _ -> permitted },
+        { _, _ -> permitted },
+        CommandManagerImpl.NO_PERMISSION_MESSAGE,
+        CommandManagerImpl.PLAYER_ONLY_MESSAGE,
     )
 
     @Test

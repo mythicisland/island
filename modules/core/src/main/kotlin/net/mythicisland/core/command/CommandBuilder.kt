@@ -4,11 +4,10 @@ import net.minestom.server.entity.Player
 import net.mythicisland.core.command.argument.CommandArgument
 
 /**
- * Builds one syntax of a [Command].
+ * Writes one syntax of a [Command].
  *
- * Every method returns a new builder, the chain it was called on stays
- * untouched. That way all branches of a command are declared as flat chains
- * next to each other instead of nested blocks:
+ * Every method returns a new builder and leaves the old one alone, so the
+ * syntaxes of a command are written flat next to each other instead of nested:
  *
  * ```
  * command.literal("visit")
@@ -21,56 +20,53 @@ import net.mythicisland.core.command.argument.CommandArgument
  *     .executesPlayer { player, context -> resize(player, context[size]) }
  * ```
  *
- * A chain is only registered once one of the execute methods is called.
+ * The syntax is registered once one of the execute methods is called.
  */
 interface CommandBuilder {
 
     /**
-     * Appends a fixed word to the syntax.
+     * Adds a word, like the `do` in `/player do <something>`.
      *
-     * Passing multiple names makes all of them valid at this position, the
-     * client shows them as separate branches.
+     * With several names all of them are accepted, the client shows each of
+     * them separately.
      *
      * @param names the accepted words, at least one.
-     * @return a new builder containing the literal.
+     * @return a new builder with the word added.
      */
     fun literal(vararg names: String): CommandBuilder
 
     /**
-     * Appends an argument to the syntax.
+     * Adds an argument. Optional ones have to come last.
      *
-     * Optional arguments have to be appended last, see
-     * [net.mythicisland.core.command.argument.CommandArgument.optional].
-     *
-     * @param argument the argument declaration.
-     * @return a new builder containing the argument.
+     * @param argument the argument to add.
+     * @return a new builder with the argument added.
      */
     fun argument(argument: CommandArgument<*>): CommandBuilder
 
     /**
-     * Requires a permission for this syntax, on top of [Command.permission].
+     * Asks for a permission on top of [Command.permission].
      *
-     * Senders without the permission neither see the syntax in their
-     * auto completion nor can they execute it.
+     * Without it a sender neither sees the syntax in the autocompletion nor
+     * can they run it.
      *
-     * @param permission the required permission.
-     * @return a new builder requiring the permission.
+     * @param permission the needed permission.
+     * @return a new builder asking for the permission.
      */
     fun permission(permission: String): CommandBuilder
 
     /**
-     * Registers this chain with an executor accepting every sender.
+     * Registers the syntax with code that any sender may run.
      *
-     * @param executor called once the syntax was parsed successfully.
+     * @param executor runs once the syntax was parsed.
      */
     fun executes(executor: (CommandContext) -> Unit)
 
     /**
-     * Registers this chain with an executor only accepting players.
+     * Registers the syntax with code that only players may run.
      *
-     * The console neither sees the syntax nor can it execute it.
+     * The console neither sees the syntax nor can it run it.
      *
-     * @param executor called once the syntax was parsed successfully.
+     * @param executor runs once the syntax was parsed.
      */
     fun executesPlayer(executor: (Player, CommandContext) -> Unit)
 

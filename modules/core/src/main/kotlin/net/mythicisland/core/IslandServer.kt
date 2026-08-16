@@ -1,6 +1,7 @@
 package net.mythicisland.core
 
 import app.simplecloud.api.CloudApi
+import net.luckperms.api.LuckPerms
 import net.minestom.server.instance.InstanceManager
 import net.minestom.server.timer.Scheduler
 
@@ -30,6 +31,11 @@ interface IslandServer {
      * Gets the [CloudApi] instance from this server.
      */
     fun getCloudApi(): CloudApi
+
+    /**
+     * Gets the [LuckPerms] Instance from the [net.luckperms.api.LuckPermsProvider]
+     */
+    fun getLuckPerms(): LuckPerms
 
     /**
      * Gets the Global [Scheduler] from this server.

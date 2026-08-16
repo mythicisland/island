@@ -1,11 +1,9 @@
 package net.mythicisland.core.command
 
 /**
- * A command definition.
+ * A command with all the syntaxes it accepts.
  *
- * A command describes its name, its aliases and every syntax it accepts. The
- * syntaxes are declared in [build] as flat chains, one chain per executable
- * branch:
+ * The syntaxes are written in [build], one chain per syntax:
  *
  * ```
  * class IslandCommand : Command {
@@ -23,38 +21,34 @@ package net.mythicisland.core.command
  * }
  * ```
  *
- * Implementations are turned into a Minestom command by the [CommandManager],
- * they never talk to Minestom themselves.
+ * The [CommandManager] turns this into a Minestom command, so a command never
+ * talks to Minestom itself.
  */
 interface Command {
 
     /**
-     * The primary name of the command, without the leading slash.
+     * The name of the command, without the leading slash.
      */
     val name: String
 
     /**
-     * The alternative names of the command.
+     * Other names the command also listens to.
      */
     val aliases: List<String>
         get() = emptyList()
 
     /**
-     * The permission required to use any syntax of this command, null if the
-     * command is available to everyone. Single branches can require additional
-     * permissions through [CommandBuilder.permission].
+     * The permission needed for the whole command, null if everyone may use
+     * it. Single syntaxes can ask for more with [CommandBuilder.permission].
      */
     val permission: String?
         get() = null
 
     /**
-     * Declares every syntax of this command.
+     * Writes the syntaxes of this command. Called once while registering.
      *
-     * Called once while the command is registered. The given builder is the
-     * empty root chain, every call on it returns a new chain, so multiple
-     * branches can be declared next to each other without interfering.
-     *
-     * @param command the root chain of this command.
+     * @param command an empty chain to start from. Every call on it returns a
+     * new chain, so the syntaxes cannot get in each other's way.
      */
     fun build(command: CommandBuilder)
 

@@ -1,7 +1,7 @@
 package net.mythicisland.core.command
 
 /**
- * Holds every command known to the server.
+ * Holds every command the server knows.
  */
 interface CommandRegistry {
 
