@@ -12,7 +12,7 @@ interface IslandServer {
     fun getServerId(): String
 
     /**
-     * Gets the Name from the simplecloud server e.g. battle-1.
+     * Gets the Name from the simplecloud server (e.g. battle-1).
      */
     fun getServerName(): String
 
@@ -29,7 +29,7 @@ interface IslandServer {
     /**
      * Gets the [CloudApi] instance from this server.
      */
-    //fun getCloudApi(): CloudApi
+    fun getCloudApi(): CloudApi
 
     /**
      * Gets the Global [Scheduler] from this server.
