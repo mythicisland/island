@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    runs-on: blacksmith-4-ubuntu-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Repository
