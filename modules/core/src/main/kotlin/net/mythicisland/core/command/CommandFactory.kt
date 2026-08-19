@@ -1,46 +1,34 @@
 package net.mythicisland.core.command
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.command.CommandSender
-import net.minestom.server.command.builder.CommandExecutor
 import net.minestom.server.command.builder.condition.CommandCondition
 import net.minestom.server.entity.Player
 import net.mythicisland.core.command.argument.CommandArgument
 import net.mythicisland.core.command.impl.CommandBuilderImpl
 import net.mythicisland.core.command.impl.CommandContextImpl
 import net.minestom.server.command.builder.Command as MinestomCommand
+import net.minestom.server.command.builder.CommandExecutor as MinestomExecutor
 
-/**
- * Turns a [Command] into the Minestom command it is registered as.
- */
-class CommandFactory(
-    private val permissions: (CommandSender, String) -> Boolean,
-    private val noPermissionMessage: Component,
-    private val playerOnlyMessage: Component,
-) {
+class CommandFactory {
 
     /**
      * Builds a command.
      *
      * @param command the command to build.
      * @return the Minestom command to register.
-     * @throws IllegalArgumentException if one of the syntaxes is invalid.
+     * @throws IllegalArgumentException if the command is built in a way that cannot work.
      */
     fun create(command: Command): MinestomCommand {
         val nodes = mutableListOf<CommandNode>()
         command.build(CommandBuilderImpl(nodes))
 
         val result = MinestomCommand(command.name, *command.aliases.toTypedArray())
-        val permission = command.permission
-        if (permission != null) {
-            result.condition = CommandCondition { sender, input ->
-                allows(sender, input, permission, playerOnly = false)
-            }
-        }
 
         var defaultAssigned = false
         for (node in nodes) {
-            val executor = executorOf(node)
+            val executor = executorOf(command, node)
             val condition = conditionOf(node)
 
             for (elements in expand(node.elements)) {
@@ -55,9 +43,9 @@ class CommandFactory(
                 }
                 defaultAssigned = true
 
-                // Minestom runs the default executor without checking a
-                // condition, so the check happens here.
-                result.defaultExecutor = CommandExecutor { sender, context ->
+                // Minestom runs the default executor without asking the
+                // condition, so it is checked here instead.
+                result.defaultExecutor = MinestomExecutor { sender, context ->
                     if (condition.canUse(sender, context.input)) {
                         executor.apply(sender, context)
                     }
@@ -67,20 +55,33 @@ class CommandFactory(
         return result
     }
 
-    private fun executorOf(node: CommandNode): CommandExecutor =
-        CommandExecutor { sender, context ->
-            node.executor(CommandContextImpl(sender, context, node.elements))
+    private fun executorOf(command: Command, node: CommandNode): MinestomExecutor =
+        MinestomExecutor { sender, context ->
+            val result = node.executor.execute(CommandContextImpl(sender, context, node.elements))
+
+            report(sender, command, node, result)
         }
+
+    private fun report(
+        sender: CommandSender,
+        command: Command,
+        node: CommandNode,
+        result: CommandResult,
+    ) {
+        when (result) {
+            is CommandResult.Success -> Unit
+            is CommandResult.Failure -> sender.sendMessage(result.message)
+            is CommandResult.Syntax -> sender.sendMessage(
+                Component.text("Use it like this: ${node.usage(command.name)}", NamedTextColor.RED),
+            )
+        }
+    }
 
     private fun conditionOf(node: CommandNode): CommandCondition =
         CommandCondition { sender, input ->
-            allows(sender, input, node.permission, node.playerOnly)
+            allows(sender, input, node.playerOnly)
         }
 
-    /**
-     * Splits a syntax into the argument lists Minestom needs, one per argument
-     * count the sender may type.
-     */
     private fun expand(elements: List<CommandArgument<*>>): List<List<CommandArgument<*>>> {
         val optional = elements.indexOfFirst { element -> element.optional }
         if (optional < 0) {
@@ -89,32 +90,20 @@ class CommandFactory(
         return (optional..elements.size).map { size -> elements.take(size) }
     }
 
-    /**
-     * Checks whether a sender may use a syntax.
-     *
-     * @param input what the sender typed, null while the command list is built
-     * for a player. Nothing is sent back in that case.
-     */
-    private fun allows(
-        sender: CommandSender,
-        input: String?,
-        permission: String?,
-        playerOnly: Boolean,
-    ): Boolean {
+    private fun allows(sender: CommandSender, input: String?, playerOnly: Boolean): Boolean {
         if (playerOnly && sender !is Player) {
             if (input != null) {
-                sender.sendMessage(playerOnlyMessage)
+                sender.sendMessage(PLAYER_ONLY_MESSAGE)
             }
             return false
         }
+        return true
+    }
 
-        if (permission == null || permissions(sender, permission)) {
-            return true
-        }
-
-        if (input != null) {
-            sender.sendMessage(noPermissionMessage)
-        }
-        return false
+    companion object {
+        private val PLAYER_ONLY_MESSAGE: Component = Component.text(
+            "This command can only be used by players.",
+            NamedTextColor.RED,
+        )
     }
 }

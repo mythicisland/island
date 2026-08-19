@@ -1,23 +1,17 @@
 package net.mythicisland.core.command
 
-import net.kyori.adventure.text.Component
 import net.minestom.server.command.builder.CommandSyntax
 import net.mythicisland.core.command.argument.Arguments
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import net.minestom.server.command.builder.Command as MinestomCommand
 
 class CommandFactoryTest {
 
-    private val factory = CommandFactory(
-        permissions = { _, _ -> true },
-        noPermissionMessage = Component.empty(),
-        playerOnlyMessage = Component.empty(),
-    )
+    private val factory = CommandFactory()
 
     @Test
     fun `builds one syntax per declared branch`() {
@@ -26,8 +20,8 @@ class CommandFactoryTest {
 
         val command = factory.create(
             TestCommand("island", aliases = listOf("is")) { builder ->
-                builder.literal("visit").argument(target).executes { }
-                builder.literal("border").argument(size).executes { }
+                builder.literal("visit").argument(target).executes { CommandResult.Success }
+                builder.literal("border").argument(size).executes { CommandResult.Success }
             }
         )
 
@@ -46,7 +40,7 @@ class CommandFactoryTest {
 
         val command = factory.create(
             TestCommand("island") { builder ->
-                builder.literal("invite").argument(member).argument(reason).executes { }
+                builder.literal("invite").argument(member).argument(reason).executes { CommandResult.Success }
             }
         )
 
@@ -57,24 +51,10 @@ class CommandFactoryTest {
     }
 
     @Test
-    fun `uses the default executor for a branch without arguments`() {
-        val page = Arguments.integer("page").optional(1)
-
-        val command = factory.create(
-            TestCommand("island") { builder ->
-                builder.argument(page).executes { }
-            }
-        )
-
-        assertNotNull(command.defaultExecutor)
-        assertEquals(listOf(listOf("page")), syntaxIds(command))
-    }
-
-    @Test
     fun `keeps the command without a default executor when no branch is empty`() {
         val command = factory.create(
             TestCommand("island") { builder ->
-                builder.literal("visit").executes { }
+                builder.literal("visit").executes { CommandResult.Success }
             }
         )
 
@@ -88,8 +68,8 @@ class CommandFactoryTest {
         val error = assertFailsWith<IllegalArgumentException> {
             factory.create(
                 TestCommand("island") { builder ->
-                    builder.executes { }
-                    builder.argument(page).executes { }
+                    builder.executes { CommandResult.Success }
+                    builder.argument(page).executes { CommandResult.Success }
                 }
             )
         }
@@ -105,7 +85,7 @@ class CommandFactoryTest {
         assertFailsWith<IllegalArgumentException> {
             factory.create(
                 TestCommand("island") { builder ->
-                    builder.argument(page).argument(size).executes { }
+                    builder.argument(page).argument(size).executes { CommandResult.Success }
                 }
             )
         }
@@ -119,15 +99,12 @@ class CommandFactoryTest {
         assertFailsWith<IllegalArgumentException> {
             factory.create(
                 TestCommand("island") { builder ->
-                    builder.argument(first).argument(second).executes { }
+                    builder.argument(first).argument(second).executes { CommandResult.Success }
                 }
             )
         }
     }
 
-    /**
-     * The argument ids of every syntax, in declaration order.
-     */
     private fun syntaxIds(command: MinestomCommand): List<List<String>> =
         command.syntaxes.map { syntax: CommandSyntax -> syntax.arguments.map { argument -> argument.id } }
 }

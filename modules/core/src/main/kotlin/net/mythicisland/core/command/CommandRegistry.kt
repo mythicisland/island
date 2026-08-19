@@ -1,8 +1,5 @@
 package net.mythicisland.core.command
 
-/**
- * Holds every command the server knows.
- */
 interface CommandRegistry {
 
     /**
@@ -13,18 +10,18 @@ interface CommandRegistry {
     fun getCommands(): List<Command>
 
     /**
-     * Gets a command by its name or one of its aliases, case-insensitive.
+     * Gets a command by its name or one of its aliases.
      *
      * @param name the name to look up.
-     * @return the command, null if no command uses the name.
+     * @return the command, or null if no command uses this name.
      */
     fun getCommand(name: String): Command?
 
     /**
-     * Gets whether a name or alias is already taken.
+     * Checks if a command is registered.
      *
      * @param name the name to look up.
-     * @return true if a command uses the name.
+     * @return true if a command uses this name.
      */
     fun isRegistered(name: String): Boolean
 

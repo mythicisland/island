@@ -2,15 +2,23 @@ package net.mythicisland.core.command
 
 import net.mythicisland.core.command.argument.CommandArgument
 
-/**
- * One syntax of a command, for example `/player do <something>`.
- *
- * Literals like `do` sit in [elements] too, they are just arguments that
- * accept a single fixed word.
- */
 class CommandNode(
     val elements: List<CommandArgument<*>>,
-    val permission: String?,
     val playerOnly: Boolean,
-    val executor: (CommandContext) -> Unit,
-)
+    val executor: CommandExecutor,
+) {
+
+    fun usage(name: String): String {
+        val usage = StringBuilder("/").append(name)
+
+        for (element in elements) {
+            usage.append(' ')
+            when {
+                element.literal -> usage.append(element.name)
+                element.optional -> usage.append('[').append(element.name).append(']')
+                else -> usage.append('<').append(element.name).append('>')
+            }
+        }
+        return usage.toString()
+    }
+}

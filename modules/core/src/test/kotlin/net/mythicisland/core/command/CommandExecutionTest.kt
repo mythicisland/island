@@ -1,29 +1,34 @@
 package net.mythicisland.core.command
 
-import net.minestom.server.command.ConsoleSender
-import net.minestom.server.command.builder.CommandResult
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.minestom.server.MinecraftServer
 import net.mythicisland.core.command.argument.Arguments
 import net.mythicisland.core.command.impl.CommandManagerImpl
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import net.minestom.server.command.CommandManager as MinestomCommandManager
+import net.minestom.server.command.builder.CommandResult as MinestomResult
 
 class CommandExecutionTest {
 
-    private val minestom = MinestomCommandManager()
-    private val sender = ConsoleSender()
+    private val sender = RecordingSender()
 
-    private var permitted = true
-    private val commands = CommandManagerImpl(
-        minestom,
-        { _, _ -> permitted },
-        CommandManagerImpl.NO_PERMISSION_MESSAGE,
-        CommandManagerImpl.PLAYER_ONLY_MESSAGE,
-    )
+    private lateinit var minestom: MinestomCommandManager
+    private lateinit var commands: CommandManagerImpl
+
+    @BeforeTest
+    fun createServerProcess() {
+        MinecraftServer.init()
+        minestom = MinecraftServer.getCommandManager()
+        commands = CommandManagerImpl()
+    }
 
     @Test
     fun `passes the parsed arguments to the executor`() {
@@ -32,24 +37,30 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("border").argument(size).executes { context -> received = context[size] }
+                builder.literal("border").argument(size).executes { context ->
+                    received = context[size]
+                    CommandResult.Success
+                }
             }
         )
 
         val result = minestom.execute(sender, "island border 12")
 
-        assertEquals(CommandResult.Type.SUCCESS, result.type)
+        assertEquals(MinestomResult.Type.SUCCESS, result.type)
         assertEquals(12, received)
     }
 
     @Test
-    fun `rejects an argument outside of its bounds`() {
+    fun `does not run the executor for an argument outside of its bounds`() {
         val size = Arguments.integer("size", min = 1, max = 32)
         var executed = false
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("border").argument(size).executes { executed = true }
+                builder.literal("border").argument(size).executes {
+                    executed = true
+                    CommandResult.Success
+                }
             }
         )
 
@@ -65,7 +76,10 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("members").argument(page).executes { context -> received = context[page] }
+                builder.literal("members").argument(page).executes { context ->
+                    received = context[page]
+                    CommandResult.Success
+                }
             }
         )
 
@@ -77,13 +91,16 @@ class CommandExecutionTest {
     }
 
     @Test
-    fun `reports an omitted argument without a default as missing`() {
+    fun `finds an omitted argument without a default as null`() {
         val reason = Arguments.greedyString("reason").optional()
         var received: String? = "unset"
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("close").argument(reason).executes { context -> received = context.find(reason) }
+                builder.literal("close").argument(reason).executes { context ->
+                    received = context.find(reason)
+                    CommandResult.Success
+                }
             }
         )
 
@@ -93,7 +110,7 @@ class CommandExecutionTest {
     }
 
     @Test
-    fun `rejects reading an argument of another branch`() {
+    fun `fails when reading an argument of another branch`() {
         val size = Arguments.integer("size")
         val page = Arguments.integer("page")
         var failure: Throwable? = null
@@ -101,40 +118,34 @@ class CommandExecutionTest {
         commands.register(
             TestCommand("island") { builder ->
                 builder.literal("border").argument(size).executes { context ->
-                    try {
-                        context[page]
-                    } catch (exception: IllegalArgumentException) {
-                        failure = exception
-                    }
+                    failure = runCatching { context[page] }.exceptionOrNull()
+                    CommandResult.Success
                 }
             }
         )
 
         minestom.execute(sender, "island border 4")
 
-        assertNotNull(failure)
+        assertIs<IllegalArgumentException>(failure)
     }
 
     @Test
-    fun `rejects reading an omitted argument without a default`() {
+    fun `fails when reading an omitted argument without a default`() {
         val reason = Arguments.greedyString("reason").optional()
         var failure: Throwable? = null
 
         commands.register(
             TestCommand("island") { builder ->
                 builder.literal("close").argument(reason).executes { context ->
-                    try {
-                        context[reason]
-                    } catch (exception: IllegalArgumentException) {
-                        failure = exception
-                    }
+                    failure = runCatching { context[reason] }.exceptionOrNull()
+                    CommandResult.Success
                 }
             }
         )
 
         minestom.execute(sender, "island close")
 
-        assertNotNull(failure)
+        assertIs<IllegalArgumentException>(failure)
     }
 
     @Test
@@ -144,7 +155,10 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("close").argument(reason).executes { context -> received = context[reason] }
+                builder.literal("close").argument(reason).executes { context ->
+                    received = context[reason]
+                    CommandResult.Success
+                }
             }
         )
 
@@ -159,31 +173,63 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island", aliases = listOf("is")) { builder ->
-                builder.literal("home").executes { executed = true }
+                builder.literal("home").executes {
+                    executed = true
+                    CommandResult.Success
+                }
             }
         )
 
-        assertEquals(CommandResult.Type.SUCCESS, minestom.execute(sender, "is home").type)
+        assertEquals(MinestomResult.Type.SUCCESS, minestom.execute(sender, "is home").type)
         assertTrue(executed)
     }
 
     @Test
-    fun `blocks a branch the sender has no permission for`() {
-        var executed = false
-
+    fun `sends nothing when the executor reports success`() {
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("delete").permission("island.delete").executes { executed = true }
+                builder.literal("home").executes { CommandResult.Success }
             }
         )
 
-        permitted = false
-        minestom.execute(sender, "island delete")
-        assertFalse(executed)
+        minestom.execute(sender, "island home")
 
-        permitted = true
-        minestom.execute(sender, "island delete")
-        assertTrue(executed)
+        assertTrue(sender.messages.isEmpty())
+    }
+
+    @Test
+    fun `sends the usage when the executor reports a syntax error`() {
+        val size = Arguments.integer("size")
+        val reason = Arguments.greedyString("reason").optional()
+
+        commands.register(
+            TestCommand("island") { builder ->
+                builder.literal("border").argument(size).argument(reason).executes { CommandResult.Syntax }
+            }
+        )
+
+        minestom.execute(sender, "island border 4")
+
+        assertEquals(
+            Component.text("Use it like this: /island border <size> [reason]", NamedTextColor.RED),
+            sender.messages.single(),
+        )
+    }
+
+    @Test
+    fun `sends the message of a failure`() {
+        commands.register(
+            TestCommand("island") { builder ->
+                builder.literal("home").executes { CommandResult.failure("You have no island.") }
+            }
+        )
+
+        minestom.execute(sender, "island home")
+
+        assertEquals(
+            Component.text("You have no island.", NamedTextColor.RED),
+            sender.messages.single(),
+        )
     }
 
     @Test
@@ -192,13 +238,38 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.literal("home").executesPlayer { _, _ -> executed = true }
+                builder.literal("home").playerOnly().executes {
+                    executed = true
+                    CommandResult.Success
+                }
             }
         )
 
         minestom.execute(sender, "island home")
 
         assertFalse(executed)
+        assertEquals(
+            Component.text("This command can only be used by players.", NamedTextColor.RED),
+            sender.messages.single(),
+        )
+    }
+
+    @Test
+    fun `fails when the console reads the player of a branch that is open to all`() {
+        var failure: Throwable? = null
+
+        commands.register(
+            TestCommand("island") { builder ->
+                builder.literal("home").executes { context ->
+                    failure = runCatching { context.player }.exceptionOrNull()
+                    CommandResult.Success
+                }
+            }
+        )
+
+        minestom.execute(sender, "island home")
+
+        assertIs<IllegalStateException>(failure)
     }
 
     @Test
@@ -207,7 +278,10 @@ class CommandExecutionTest {
 
         commands.register(
             TestCommand("island") { builder ->
-                builder.executes { executed = true }
+                builder.executes {
+                    executed = true
+                    CommandResult.Success
+                }
             }
         )
 
@@ -220,13 +294,16 @@ class CommandExecutionTest {
     fun `stops executing an unregistered command`() {
         var executed = false
         val command = TestCommand("island") { builder ->
-            builder.literal("home").executes { executed = true }
+            builder.literal("home").executes {
+                executed = true
+                CommandResult.Success
+            }
         }
 
         commands.register(command)
         commands.unregister(command)
 
-        assertEquals(CommandResult.Type.UNKNOWN, minestom.execute(sender, "island home").type)
+        assertEquals(MinestomResult.Type.UNKNOWN, minestom.execute(sender, "island home").type)
         assertFalse(executed)
         assertTrue(commands.getRegisteredCommands().isEmpty())
     }
@@ -234,7 +311,7 @@ class CommandExecutionTest {
     @Test
     fun `looks the registered command up by name and alias`() {
         val command = TestCommand("island", aliases = listOf("is")) { builder ->
-            builder.literal("home").executes { }
+            builder.literal("home").executes { CommandResult.Success }
         }
 
         commands.register(command)
@@ -243,5 +320,22 @@ class CommandExecutionTest {
         assertEquals(command, registry.getCommand("island"))
         assertEquals(command, registry.getCommand("IS"))
         assertNull(registry.getCommand("lobby"))
+    }
+
+    @Test
+    fun `fails when a name is registered twice`() {
+        commands.register(
+            TestCommand("island") { builder ->
+                builder.literal("home").executes { CommandResult.Success }
+            }
+        )
+
+        assertFailsWith<IllegalStateException> {
+            commands.register(
+                TestCommand("island") { builder ->
+                    builder.literal("visit").executes { CommandResult.Success }
+                }
+            )
+        }
     }
 }

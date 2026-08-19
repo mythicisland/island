@@ -7,24 +7,17 @@ import net.minestom.server.entity.Player
 import java.util.UUID
 
 /**
- * The argument types the commands can use.
- *
- * Underneath every one of them is a Minestom argument type, so the client
- * still colours the command correctly and offers completions. What is missing
- * here can be built by wrapping a Minestom argument with [CommandArgument].
+ * The argument types a command can use.
  */
 object Arguments {
 
-    /**
-     * Reported when a player argument found nobody online.
-     */
     const val PLAYER_NOT_FOUND_ERROR: Int = 100
 
     /**
      * A single word without spaces.
      *
      * @param name the argument name.
-     * @param allowed the accepted words, every word is fine when empty.
+     * @param allowed the words that are accepted. If empty, every word works.
      * @return the argument.
      */
     fun word(name: String, vararg allowed: String): CommandArgument<String> {
@@ -36,7 +29,7 @@ object Arguments {
     }
 
     /**
-     * A word, or several words in quotes.
+     * A single word, or several words inside quotes.
      *
      * @param name the argument name.
      * @return the argument.
@@ -45,8 +38,7 @@ object Arguments {
         CommandArgument(ArgumentType.String(name))
 
     /**
-     * The whole rest of the input, spaces included. Has to be the last
-     * argument of the syntax.
+     * A greedy string.
      *
      * @param name the argument name.
      * @return the argument.
@@ -58,8 +50,8 @@ object Arguments {
      * A whole number.
      *
      * @param name the argument name.
-     * @param min the smallest accepted value, no limit when null.
-     * @param max the biggest accepted value, no limit when null.
+     * @param min the smallest value that is accepted.
+     * @param max the biggest value that is accepted.
      * @return the argument.
      */
     fun integer(name: String, min: Int? = null, max: Int? = null): CommandArgument<Int> {
@@ -77,8 +69,8 @@ object Arguments {
      * A decimal number.
      *
      * @param name the argument name.
-     * @param min the smallest accepted value, no limit when null.
-     * @param max the biggest accepted value, no limit when null.
+     * @param min the smallest value that is accepted.
+     * @param max the biggest value that is accepted.
      * @return the argument.
      */
     fun double(name: String, min: Double? = null, max: Double? = null): CommandArgument<Double> {
@@ -102,7 +94,7 @@ object Arguments {
         CommandArgument(ArgumentType.Boolean(name))
 
     /**
-     * A uuid, written with dashes.
+     * An uuid.
      *
      * @param name the argument name.
      * @return the argument.
@@ -111,8 +103,7 @@ object Arguments {
         CommandArgument(ArgumentType.UUID(name))
 
     /**
-     * An enum value, written in lower case. The client offers all of them as
-     * completions.
+     * One value of an enum, written in lower case.
      *
      * @param name the argument name.
      * @return the argument.
@@ -124,9 +115,7 @@ object Arguments {
     }
 
     /**
-     * One online player, written as a name or as a target selector.
-     *
-     * Parsing fails when nobody matches.
+     * One player who is online.
      *
      * @param name the argument name.
      * @return the argument.

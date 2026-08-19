@@ -1,14 +1,11 @@
 package net.mythicisland.core.command
 
-/**
- * Registers the commands of the server.
- */
 interface CommandManager {
 
     /**
-     * Gets the [CommandRegistry].
+     * Gets the command registry.
      *
-     * @return the Command Registry.
+     * @return the command registry.
      */
     fun getCommandRegistry(): CommandRegistry
 
@@ -22,16 +19,16 @@ interface CommandManager {
     /**
      * Registers a command.
      *
-     * @param command the Command to register.
-     * @throws IllegalStateException if the name or one of the aliases is taken.
-     * @throws IllegalArgumentException if one of the syntaxes is invalid.
+     * @param command the command to register.
+     * @throws IllegalStateException if the name or one of the aliases is already used.
+     * @throws IllegalArgumentException if the command is built in a way that cannot work.
      */
     fun register(command: Command)
 
     /**
-     * Removes a command again. Does nothing if it was never registered.
+     * Unregisters a command.
      *
-     * @param command the Command to unregister
+     * @param command the command to unregister.
      */
     fun unregister(command: Command)
 

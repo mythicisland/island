@@ -2,14 +2,9 @@ package net.mythicisland.core.command.impl
 
 import net.minestom.server.command.CommandSender
 import net.minestom.server.command.builder.CommandContext
+import net.minestom.server.entity.Player
 import net.mythicisland.core.command.argument.CommandArgument
 
-/**
- * Default [net.mythicisland.core.command.CommandContext], reading what Minestom parsed.
- *
- * @param elements the arguments of the syntax that ran, used to catch reads
- * with an argument of another syntax.
- */
 class CommandContextImpl(
     override val sender: CommandSender,
     private val context: CommandContext,
@@ -18,6 +13,11 @@ class CommandContextImpl(
 
     override val input: String
         get() = context.input
+
+    override val player: Player
+        get() = checkNotNull(sender as? Player) {
+            "The command was run by the console, mark the chain with playerOnly()."
+        }
 
     override fun <T : Any> get(argument: CommandArgument<T>): T {
         val value = find(argument)
