@@ -14,7 +14,7 @@ class CommandBuilderImpl private constructor(
 
     constructor(nodes: MutableList<CommandNode>) : this(nodes, emptyList(), false)
 
-    override fun literal(vararg names: String): CommandBuilder {
+    override fun literal(vararg names: String, description: String?): CommandBuilder {
         require(names.isNotEmpty()) { "A literal needs at least one name." }
 
         // One name becomes a real literal. Several names become a word that
@@ -25,7 +25,8 @@ class CommandBuilderImpl private constructor(
             ArgumentType.Word(names[0]).from(*names)
         }
 
-        return CommandBuilderImpl(nodes, elements + CommandArgument.literal(argument), playerOnly)
+        val literal = CommandArgument.literal(argument, description)
+        return CommandBuilderImpl(nodes, elements + literal, playerOnly)
     }
 
     override fun argument(argument: CommandArgument<*>): CommandBuilder =

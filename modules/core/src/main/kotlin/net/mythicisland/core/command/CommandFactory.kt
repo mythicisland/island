@@ -20,10 +20,30 @@ class CommandFactory {
      * @return the Minestom command to register.
      * @throws IllegalArgumentException if the command is built in a way that cannot work.
      */
-    fun create(command: Command): MinestomCommand {
+    fun create(command: Command): MinestomCommand =
+        create(command, nodesOf(command))
+
+    /**
+     * Collects the ways a command can be typed.
+     *
+     * @param command the command to build.
+     * @return the nodes of the command.
+     */
+    fun nodesOf(command: Command): List<CommandNode> {
         val nodes = mutableListOf<CommandNode>()
         command.build(CommandBuilderImpl(nodes))
+        return nodes
+    }
 
+    /**
+     * Builds a command from nodes that were already collected.
+     *
+     * @param command the command to build.
+     * @param nodes the nodes of the command.
+     * @return the Minestom command to register.
+     * @throws IllegalArgumentException if the command is built in a way that cannot work.
+     */
+    fun create(command: Command, nodes: List<CommandNode>): MinestomCommand {
         val result = MinestomCommand(command.name, *command.aliases.toTypedArray())
 
         var defaultAssigned = false

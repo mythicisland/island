@@ -4,7 +4,7 @@ import net.mythicisland.core.command.argument.CommandArgument
 
 interface CommandBuilder {
 
-    fun literal(vararg names: String): CommandBuilder
+    fun literal(vararg names: String, description: String? = null): CommandBuilder
 
     fun argument(argument: CommandArgument<*>): CommandBuilder
 

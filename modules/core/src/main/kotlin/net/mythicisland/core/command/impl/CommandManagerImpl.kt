@@ -16,9 +16,10 @@ class CommandManagerImpl : net.mythicisland.core.command.CommandManager {
     override fun getRegisteredCommands(): List<Command> = registry.getCommands()
 
     override fun register(command: Command) {
-        val minestomCommand = factory.create(command)
+        val nodes = factory.nodesOf(command)
+        val minestomCommand = factory.create(command, nodes)
 
-        registry.add(command, minestomCommand)
+        registry.add(command, minestomCommand, nodes)
         commandManager.register(minestomCommand)
     }
 

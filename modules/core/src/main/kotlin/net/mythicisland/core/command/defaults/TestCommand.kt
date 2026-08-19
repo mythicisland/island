@@ -9,6 +9,8 @@ class TestCommand : Command {
 
     override val name = "test"
 
+    override val description = "Sends a test message back"
+
     override val aliases = listOf("t", "test123", "hello")
 
     override fun build(command: CommandBuilder) {

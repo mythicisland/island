@@ -8,6 +8,7 @@ import net.minestom.server.instance.InstanceManager
 import net.minestom.server.timer.Scheduler
 import net.mythicisland.core.IslandServer
 import net.mythicisland.core.command.CommandManager
+import net.mythicisland.core.command.defaults.HelpCommand
 import net.mythicisland.core.command.defaults.TestCommand
 import net.mythicisland.core.command.impl.CommandManagerImpl
 import org.apache.logging.log4j.LogManager
@@ -25,6 +26,7 @@ abstract class Island : IslandServer {
         MinecraftServer.setBrandName("Island")
         MinecraftServer.setCompressionThreshold(-1)
 
+        commandManager.register(HelpCommand(commandManager.getCommandRegistry()))
         commandManager.register(TestCommand())
 
         MinestomTerminal.start()
