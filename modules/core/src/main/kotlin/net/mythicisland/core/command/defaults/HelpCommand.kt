@@ -49,8 +49,7 @@ class HelpCommand(private val registry: CommandRegistry) : Command {
             return Component.text("No commands are registered.", NamedTextColor.GRAY)
         }
 
-        // The names are padded to the longest one, so the second column of
-        // every category starts at the same place.
+        // The names are padded to the longest one, so the second column of every category starts at the same place.
         val width = commands.maxOf { command -> command.name.length } + 3
         val categories = commands
             .groupBy { command -> checkNotNull(command.category) }

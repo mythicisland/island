@@ -15,7 +15,7 @@ class TestCommand : Command {
 
     override fun build(command: CommandBuilder) {
         command.executes { context ->
-            context.sender.sendMessage(Component.text("Test 1 2 3"))
+            context.sender.sendMessage(Component.text("S"))
             CommandResult.Success
         }
     }
