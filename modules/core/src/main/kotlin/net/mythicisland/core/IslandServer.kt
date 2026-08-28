@@ -3,6 +3,7 @@ package net.mythicisland.core
 import app.simplecloud.api.CloudApi
 import net.minestom.server.instance.InstanceManager
 import net.minestom.server.timer.Scheduler
+import net.mythicisland.core.command.CommandManager
 
 interface IslandServer {
 
@@ -12,7 +13,7 @@ interface IslandServer {
     fun getServerId(): String
 
     /**
-     * Gets the Name from the simplecloud server e.g. battle-1.
+     * Gets the Name from the simplecloud server (e.g. battle-1).
      */
     fun getServerName(): String
 
@@ -29,7 +30,12 @@ interface IslandServer {
     /**
      * Gets the [CloudApi] instance from this server.
      */
-    //fun getCloudApi(): CloudApi
+    fun getCloudApi(): CloudApi
+
+    /**
+     * Gets the [CommandManager] from this server, used to register commands.
+     */
+    fun getCommandManager(): CommandManager
 
     /**
      * Gets the Global [Scheduler] from this server.
