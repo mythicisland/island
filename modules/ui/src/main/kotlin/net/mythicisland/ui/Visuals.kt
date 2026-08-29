@@ -1,13 +1,20 @@
 package net.mythicisland.ui
 
+import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.translation.GlobalTranslator
+import net.mythicisland.common.i18n.Message
 import net.mythicisland.ui.layout.VisualAlignment
 import net.mythicisland.ui.layout.VisualComponent
 import net.mythicisland.ui.layout.VisualLayer
+import net.mythicisland.ui.render.UiRenderContext
 import net.mythicisland.ui.text.VisualElement
 import net.mythicisland.ui.text.VisualSpace
 import net.mythicisland.ui.text.VisualText
 import net.mythicisland.ui.text.font.VisualFonts
 import net.mythicisland.ui.text.font.metrics.MinecraftFontMetrics
+import java.util.Locale
 
 object Visuals {
 
@@ -33,6 +40,31 @@ object Visuals {
         MinecraftFontMetrics.formattedWidth(miniMessage).let { width ->
             VisualComponent(width, advance = width + 1, element = VisualText.raw(miniMessage))
         }
+
+    /**
+     * A translated message measured with the vanilla font metrics.
+     *
+     * A translation key has no width of its own, so the message is resolved for
+     * [locale] before it is measured. Build the arguments with
+     * [net.kyori.adventure.text.minimessage.translation.Argument], their names
+     * are usable as `<name>` inside the translation.
+     */
+    fun message(message: Message, locale: Locale, vararg arguments: ComponentLike): VisualComponent {
+        val translated = GlobalTranslator.render(message.component(*arguments), locale)
+
+        // An unknown key comes back untouched. Showing it keeps the gap visible
+        // instead of laying out an empty line.
+        return when (translated) {
+            is TranslatableComponent -> text(message.key)
+            else -> text(MiniMessage.miniMessage().serialize(translated))
+        }
+    }
+
+    /**
+     * A translated message, resolved for the player that is being rendered for.
+     */
+    fun message(message: Message, context: UiRenderContext, vararg arguments: ComponentLike): VisualComponent =
+        message(message, context.locale, *arguments)
 
     /**
      * A translucent background of exactly [width] pixels, built from the left
