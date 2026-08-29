@@ -4,8 +4,10 @@ import app.simplecloud.api.CloudApi
 import app.simplecloud.api.runtime.SimpleCloudRuntime
 import net.minestom.server.Auth
 import net.minestom.server.MinecraftServer
+import net.minestom.server.adventure.MinestomAdventure
 import net.minestom.server.instance.InstanceManager
 import net.minestom.server.timer.Scheduler
+import net.mythicisland.common.i18n.Translations
 import net.mythicisland.core.IslandServer
 import net.mythicisland.core.command.CommandManager
 import net.mythicisland.core.command.defaults.HelpCommand
@@ -13,6 +15,8 @@ import net.mythicisland.core.command.defaults.TestCommand
 import net.mythicisland.core.command.impl.CommandManagerImpl
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import java.nio.file.Path
+import java.util.Locale
 
 abstract class Island : IslandServer {
 
@@ -20,11 +24,15 @@ abstract class Island : IslandServer {
     private val api: CloudApi = CloudApi.create()
     private val minecraftServer: MinecraftServer = createMinecraftServer()
     private val commandManager: CommandManager = CommandManagerImpl()
+    private val translations: Translations = Translations(Path.of("lang"), Locale.US)
 
     override fun start() {
         logger.info("Starting server instance ${getServerName()} at ${getServerHost()}:${getServerPort()}")
         MinecraftServer.setBrandName("Island")
         MinecraftServer.setCompressionThreshold(-1)
+
+        translations.install()
+        MinestomAdventure.setDefaultLocale(Locale.US)
 
         commandManager.register(HelpCommand(commandManager.getCommandRegistry()))
         commandManager.register(TestCommand())
