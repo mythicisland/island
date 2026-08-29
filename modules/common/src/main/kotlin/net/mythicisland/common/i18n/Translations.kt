@@ -13,7 +13,7 @@ import java.util.Locale
  */
 class Translations(directory: Path, defaultLocale: Locale) {
 
-    private val logger = LogManager.getLogger(this::class.java)
+    private val logger = LogManager.getLogger(Translations::class.java)
     private val loader = TranslationLoader(directory)
     private val translator = MessageTranslator(defaultLocale)
     private val cache = CachedTranslator(this.translator)

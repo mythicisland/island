@@ -19,7 +19,7 @@ import kotlin.io.path.nameWithoutExtension
  */
 class TranslationLoader(private val directory: Path) {
 
-    private val logger = LogManager.getLogger(this::class.java)
+    private val logger = LogManager.getLogger(TranslationLoader::class.java)
 
     /**
      * Reads every locale of the directory.

@@ -14,11 +14,11 @@ import java.util.Locale
 /**
  * Caches the components of messages without arguments.
  *
- * @property delegate the translator doing the actual work.
+ * @property translator the translator doing the actual work.
  * @param maximumSize the number of components kept in memory.
  */
 class CachedTranslator(
-    private val delegate: MessageTranslator,
+    private val translator: MessageTranslator,
     maximumSize: Long = 4096,
 ) : Translator {
 
@@ -27,19 +27,19 @@ class CachedTranslator(
         .recordStats()
         .build()
 
-    override fun name(): Key = this.delegate.name()
+    override fun name(): Key = this.translator.name()
 
-    override fun hasAnyTranslations(): TriState = this.delegate.hasAnyTranslations()
+    override fun hasAnyTranslations(): TriState = this.translator.hasAnyTranslations()
 
     override fun canTranslate(key: String, locale: Locale): Boolean =
-        this.delegate.canTranslate(key, locale)
+        this.translator.canTranslate(key, locale)
 
     /** Messages are always built from MiniMessage, never from a message format. */
     override fun translate(key: String, locale: Locale): MessageFormat? = null
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
         if (!isCacheable(component)) {
-            return this.delegate.translate(component, locale)
+            return this.translator.translate(component, locale)
         }
 
         val cacheKey = component.key() to locale
@@ -49,7 +49,7 @@ class CachedTranslator(
         }
 
         // Unknown keys stay null, so the client keeps translating them itself.
-        val translated = this.delegate.translate(component, locale)
+        val translated = this.translator.translate(component, locale)
         if (translated != null) {
             this.components.put(cacheKey, translated)
         }
@@ -73,9 +73,9 @@ class CachedTranslator(
      * @return true if the rendered component may be cached.
      */
     private fun isCacheable(component: TranslatableComponent): Boolean =
-        component.arguments().isEmpty()
-            && component.children().isEmpty()
-            && component.style() == Style.empty()
-            && component.fallback() == null
+        component.arguments().isEmpty() &&
+                component.children().isEmpty() &&
+                component.style() == Style.empty() &&
+                component.fallback() == null
 
 }
