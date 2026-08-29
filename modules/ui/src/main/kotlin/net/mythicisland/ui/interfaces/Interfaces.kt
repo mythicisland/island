@@ -28,7 +28,7 @@ object Interfaces {
 
     private val viewTag = Tag.Transient<InterfaceView>("island:interface_view")
 
-    private val node = EventNode.all("island-interfaces")
+    private val node = EventNode.all("interfaces")
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** Registers the listeners, called once on startup. */
@@ -94,10 +94,7 @@ object Interfaces {
         when {
             view.draws(event.inventory) -> {
                 event.isCancelled = true
-
-                // The slot is -999 for drags and drops, which never matches.
-                val element = view.find(event.inventory, event.slot)
-                when (element) {
+                when (val element = view.find(event.inventory, event.slot)) {
                     null -> Unit
                     else -> launch { element.onClick(InterfaceClick(view, event.slot, event.click)) }
                 }

@@ -15,7 +15,7 @@ import net.mythicisland.ui.interfaces.interfaces.Interface
 import java.util.Locale
 
 /**
- * One interface, open for one player.
+ * One interface view.
  */
 class InterfaceView internal constructor(
     val player: Player,
@@ -23,11 +23,6 @@ class InterfaceView internal constructor(
     private val window: Inventory?,
 ) {
 
-    /**
-     * The elements by inventory slot. Window and player inventory are kept
-     * apart because both number their slots from zero. Only read and written
-     * on the tick thread.
-     */
     private val windowElements = Int2ObjectOpenHashMap<InterfaceElement>()
     private val playerElements = Int2ObjectOpenHashMap<InterfaceElement>()
 
