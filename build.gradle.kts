@@ -20,7 +20,21 @@ allprojects {
     }
 }
 
+val distributionTasks = setOf("distTar", "distZip", "shadowDistTar", "shadowDistZip")
+
+tasks.jar {
+    enabled = false
+}
+
+tasks.shadowJar {
+    enabled = false
+}
+
 subprojects {
+    if (subprojects.isNotEmpty()) {
+        return@subprojects
+    }
+
     apply {
         plugin("kotlin")
         plugin("com.gradleup.shadow")
@@ -62,11 +76,17 @@ subprojects {
     }
 
     tasks.shadowJar {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
         mergeServiceFiles()
         archiveFileName.set("${project.name}.jar")
         manifest {
             attributes["Enable-Native-Access"] = "ALL-UNNAMED"
         }
+    }
+
+    tasks.matching { task -> task.name in distributionTasks }.configureEach {
+        enabled = false
     }
 
 }
